@@ -213,6 +213,9 @@ public class KingTellerService extends Service {
 	private Timer timerCheckauth = null;
 	private Timer timerCheckNetwork = null;
 	private Timer timerCheckUpdatedz = null;
+	private double nowLat;
+	private double nowLng;
+
 	//private ScreenReceiver mReceiver = null;
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -292,7 +295,7 @@ public class KingTellerService extends Service {
 			
 			timerCheckUpdatedz.schedule(timerTaskUpdatedz,//监听方法
 					KingTellerStaticConfig.SERVICE_LOCATION_TIME * 1000,//开始时 延迟时间
-					KingTellerStaticConfig.SERVICE_LOCATION_TIME * 5 * 1000);//执行间隔时间
+					KingTellerStaticConfig.SERVICE_LOCATION_TIME * 10 * 1000);//执行间隔时间
 			
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -354,7 +357,11 @@ public class KingTellerService extends Service {
 	private void UploadLocation(final AddressBean address) {
 		Log.i(TAG, "UploadLocation: 纬度" + address.getLat() + "经度" + address.getLng());
 		if (addressBeanDao != null) {
-			addressBeanDao.insert(address);
+			if (nowLat != address.getLat() || nowLng != address.getLng()) {
+				nowLat = address.getLat();
+				nowLng = address.getLng();
+                addressBeanDao.insert(address);
+            }
 		}
 		/*if (KingTellerApplication.getApplication().IsLogin()) {
 			fh = new KTHttpClient(true);
