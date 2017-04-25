@@ -1,9 +1,6 @@
 package com.kingteller.client.service;
 
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 import android.app.KeyguardManager;
 import android.app.Service;
 import android.content.Context;
@@ -27,6 +24,14 @@ import com.kingteller.client.bean.dao.AddressBeanDao;
 import com.kingteller.client.bean.map.AddressBean;
 import com.kingteller.client.config.KingTellerStaticConfig;
 import com.kingteller.client.utils.KingTellerJudgeUtils;
+import com.lzy.okgo.OkGo;
+import com.lzy.okgo.callback.StringCallback;
+
+import java.util.Timer;
+import java.util.TimerTask;
+
+import okhttp3.Call;
+import okhttp3.Response;
 
 
 /**
@@ -60,7 +65,6 @@ public class KingTellerService extends Service {
 		 */
 		@Override
 		public void onLocationChanged(AMapLocation location) {
-
 			int errorCode = location.getAMapException().getErrorCode();
 			if (location != null && errorCode == 0) {
 				String desc = "";
@@ -205,7 +209,7 @@ public class KingTellerService extends Service {
 			 *listener:定位监听者
 			 */
 			aMapLocManager.removeUpdates(staffListener);
-			aMapLocManager.requestLocationData(LocationProviderProxy.AMapNetwork, -1, 0, staffListener);
+			aMapLocManager.requestLocationData(LocationProviderProxy.AMapNetwork, -1, 100, staffListener);
 			aMapLocManager.setGpsEnable(true);
 		}
 	};
@@ -295,7 +299,7 @@ public class KingTellerService extends Service {
 			
 			timerCheckUpdatedz.schedule(timerTaskUpdatedz,//监听方法
 					KingTellerStaticConfig.SERVICE_LOCATION_TIME * 1000,//开始时 延迟时间
-					KingTellerStaticConfig.SERVICE_LOCATION_TIME * 10 * 1000);//执行间隔时间
+					KingTellerStaticConfig.SERVICE_LOCATION_TIME * 1 * 1000);//执行间隔时间
 			
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -360,8 +364,41 @@ public class KingTellerService extends Service {
 			if (nowLat != address.getLat() || nowLng != address.getLng()) {
 				nowLat = address.getLat();
 				nowLng = address.getLng();
-                addressBeanDao.insert(address);
+				String url  = "http://192.168.32.71:8080/AMapLocation/UploadLocation?"+"address="+address.getAddress()+"&name="+address.getName()+"&lat="+address.getLat()+"&lng="+address.getLng()+"&city="+address.getCity();
+			//	addressBeanDao.insert(address);
+				/*Subscription subscription = OkGo.get(url)
+						      .getCall(StringConvert.create(), RxAdapter.<String>create())
+						      .observeOn(AndroidSchedulers.mainThread())//切换到主线程
+						      .subscribe(new Action1<String>() {
+								  @Override
+								  public void call(String isSuccess) {
+									  Log.e(TAG, isSuccess );
+								  }
+							  }, new Action1<Throwable>() {
+								  @Override
+								  public void call(Throwable throwable) {
+									  throwable.printStackTrace();            //请求失败
+									  Log.e(TAG, "请求失败" );
+								  }
+							  });
+				KingTellerApplication.getApplication().addSubscribe(subscription);*/
+				OkGo.get(url)     // 请求方式和请求url
+						.tag(this)                       // 请求的 tag, 主要用于取消对应的请求
+						.execute(new StringCallback() {
+							@Override
+							public void onSuccess(String s, Call call, Response response) {
+								// s 即为所需要的结果
+								Log.i(TAG, "onSuccess: " + s);
+							}
+
+							@Override
+							public void onError(Call call, Response response, Exception e) {
+								Log.i(TAG, "onError: 请求失败"+e.getMessage());
+								super.onError(call, response, e);
+							}
+						});
             }
+
 		}
 		/*if (KingTellerApplication.getApplication().IsLogin()) {
 			fh = new KTHttpClient(true);

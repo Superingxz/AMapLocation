@@ -1,11 +1,11 @@
 package com.kingteller;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Bundle;
+import android.util.Log;
 
-import com.amap.api.maps2d.AMap;
 import com.amap.api.maps2d.CameraUpdateFactory;
 import com.amap.api.maps2d.model.BitmapDescriptorFactory;
 import com.amap.api.maps2d.model.LatLng;
@@ -14,13 +14,18 @@ import com.amap.api.maps2d.model.MarkerOptions;
 import com.kingteller.client.activity.base.BaseMapActivity;
 import com.kingteller.client.bean.dao.AddressBeanDao;
 import com.kingteller.client.bean.map.AddressBean;
+import com.kingteller.client.callback.JsonCallback;
 import com.kingteller.client.config.KingTellerStaticConfig;
 import com.kingteller.client.service.KingTellerService;
 import com.kingteller.client.utils.KingTellerJudgeUtils;
+import com.lzy.okgo.OkGo;
 
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import okhttp3.Call;
+import okhttp3.Response;
 
 public class MainActivity extends BaseMapActivity {
     private AddressBeanDao addressBeanDao;
@@ -75,15 +80,43 @@ public class MainActivity extends BaseMapActivity {
             timerCheckUpdatedz = new Timer();
         timerCheckUpdatedz.schedule(timerTaskUpdatedz,//监听方法
                 KingTellerStaticConfig.SERVICE_LOCATION_TIME * 1000,//开始时 延迟时间
-                KingTellerStaticConfig.SERVICE_LOCATION_TIME * 2 * 1000);//执行间隔时间
+                KingTellerStaticConfig.SERVICE_LOCATION_TIME * 5 * 1000);//执行间隔时间
     }
 
     private TimerTask timerTaskUpdatedz = new TimerTask() {
         public void run() {
-            addressBeanList = addressBeanDao.loadAll();
-            if (addressBeanList != null && addressBeanList.size() > 0) {
-                location(addressBeanList);
-            }
+            OkGo.get("http://192.168.32.71:8080/AMapLocation/LocationList")     // 请求方式和请求url
+                    .tag(this)                       // 请求的 tag, 主要用于取消对应的请求
+                    .execute(new JsonCallback<List<AddressBean>>() {
+                        @Override
+                        public void onSuccess(List<AddressBean> addressBeanList, Call call, Response response) {
+                            if (addressBeanList != null && addressBeanList.size() > 0) {
+                                location(addressBeanList);
+                            }
+                        }
+                        @Override
+                        public void onError(Call call, Response response, Exception e) {
+                            Log.i("MainActivity", "onError: 请求失败"+e.getMessage());
+                            super.onError(call, response, e);
+                        }
+                    });
+          /*  OkGo.get("http://192.168.32.71:8080/AMapLocation/LocationList")     // 请求方式和请求url
+                    .tag(this)                       // 请求的 tag, 主要用于取消对应的请求
+                    .execute(new StringCallback() {
+                        @Override
+                        public void onSuccess(String s, Call call, Response response) {
+                            // s 即为所需要的结果
+                            Log.i(TAG, "onSuccess: " + s);
+                        }
+
+                        @Override
+                        public void onError(Call call, Response response, Exception e) {
+                            Log.i(TAG, "onError: 请求失败"+e.getMessage());
+                            super.onError(call, response, e);
+                        }
+                    });*/
+          //  addressBeanList = getAddressBeanList();
+            // addressBeanList = addressBeanDao.loadAll();
         }
     };
 
@@ -95,5 +128,9 @@ public class MainActivity extends BaseMapActivity {
             newLatLng = new LatLng(nowLat, nowLng);
             handler.sendEmptyMessage(0);
         }
+    }
+
+    public List<AddressBean> getAddressBeanList() {
+        return addressBeanList;
     }
 }
