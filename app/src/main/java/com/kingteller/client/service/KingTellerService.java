@@ -23,6 +23,7 @@ import com.kingteller.KingTellerApplication;
 import com.kingteller.client.bean.dao.AddressBeanDao;
 import com.kingteller.client.bean.map.AddressBean;
 import com.kingteller.client.config.KingTellerStaticConfig;
+import com.kingteller.client.utils.KingTellerConfigUtils;
 import com.kingteller.client.utils.KingTellerJudgeUtils;
 import com.lzy.okgo.OkGo;
 import com.lzy.okgo.callback.StringCallback;
@@ -364,8 +365,8 @@ public class KingTellerService extends Service {
 			if (nowLat != address.getLat() || nowLng != address.getLng()) {
 				nowLat = address.getLat();
 				nowLng = address.getLng();
-				String url  = "http://192.168.32.71:8080/AMapLocation/UploadLocation?"+"address="+address.getAddress()+"&name="+address.getName()+"&lat="+address.getLat()+"&lng="+address.getLng()+"&city="+address.getCity();
-			//	addressBeanDao.insert(address);
+				String url  = "http://"+ KingTellerConfigUtils.getIpDomain(KingTellerService.this)+":"+KingTellerConfigUtils.getPort(KingTellerService.this)+"/Location/UploadLocation?"+"address="+address.getAddress()+"&name="+address.getName()+"&lat="+address.getLat()+"&lng="+address.getLng()+"&city="+address.getCity();
+				//	addressBeanDao.insert(address);
 				/*Subscription subscription = OkGo.get(url)
 						      .getCall(StringConvert.create(), RxAdapter.<String>create())
 						      .observeOn(AndroidSchedulers.mainThread())//切换到主线程
