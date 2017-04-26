@@ -8,4 +8,11 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="Login_dialog" parent="@android:style/Theme.Holo.Light.Dialog.NoActionBar">
+        <item name="android:windowFrame">@null</item><!-- 边框 -->
+        <item name="android:windowIsFloating">true</item><!-- 是否悬浮在activity上 -->
+        <item name="android:windowBackground">@android:color/transparent</item><!-- 背景透明 -->
+        <item name="android:backgroundDimEnabled">true</item><!-- 模糊 -->
+        <item name="android:backgroundDimAmount">0.4</item><!-- 灰度 -->
+    </style>
 </resources>
