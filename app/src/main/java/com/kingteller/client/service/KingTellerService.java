@@ -22,17 +22,10 @@ import com.amap.api.location.LocationProviderProxy;
 import com.kingteller.KingTellerApplication;
 import com.kingteller.client.bean.dao.AddressBeanDao;
 import com.kingteller.client.bean.map.AddressBean;
-import com.kingteller.client.config.KingTellerStaticConfig;
-import com.kingteller.client.utils.KingTellerConfigUtils;
 import com.kingteller.client.utils.KingTellerJudgeUtils;
-import com.lzy.okgo.OkGo;
-import com.lzy.okgo.callback.StringCallback;
 
 import java.util.Timer;
 import java.util.TimerTask;
-
-import okhttp3.Call;
-import okhttp3.Response;
 
 
 /**
@@ -299,8 +292,8 @@ public class KingTellerService extends Service {
 					KingTellerStaticConfig.SERVICE_LOCATION_TIME * 60 * 1000);//执行间隔时间*/
 			
 			timerCheckUpdatedz.schedule(timerTaskUpdatedz,//监听方法
-					KingTellerStaticConfig.SERVICE_LOCATION_TIME * 1000,//开始时 延迟时间
-					KingTellerStaticConfig.SERVICE_LOCATION_TIME * 1 * 1000);//执行间隔时间
+					1000,//开始时 延迟时间
+					1000);//执行间隔时间
 			
 		} catch (Exception e) {
 			// TODO: handle exception
@@ -365,9 +358,9 @@ public class KingTellerService extends Service {
 			if (nowLat != address.getLat() || nowLng != address.getLng()) {
 				nowLat = address.getLat();
 				nowLng = address.getLng();
-				String url  = "http://"+ KingTellerConfigUtils.getIpDomain(KingTellerService.this)+":"+KingTellerConfigUtils.getPort(KingTellerService.this)+"/Location/UploadLocation?"+"address="+address.getAddress()+"&name="+address.getName()+"&lat="+address.getLat()+"&lng="+address.getLng()+"&city="+address.getCity();
-				//	addressBeanDao.insert(address);
-				/*Subscription subscription = OkGo.get(url)
+				addressBeanDao.insert(address);
+				/*String url  = "http://"+ KingTellerConfigUtils.getIpDomain(KingTellerService.this)+":"+KingTellerConfigUtils.getPort(KingTellerService.this)+"/Location/UploadLocation?"+"address="+address.getAddress()+"&name="+address.getName()+"&lat="+address.getLat()+"&lng="+address.getLng()+"&city="+address.getCity();
+				Subscription subscription = OkGo.get(url)
 						      .getCall(StringConvert.create(), RxAdapter.<String>create())
 						      .observeOn(AndroidSchedulers.mainThread())//切换到主线程
 						      .subscribe(new Action1<String>() {
@@ -383,7 +376,7 @@ public class KingTellerService extends Service {
 								  }
 							  });
 				KingTellerApplication.getApplication().addSubscribe(subscription);*/
-				OkGo.get(url)     // 请求方式和请求url
+				/*OkGo.get(url)     // 请求方式和请求url
 						.tag(this)                       // 请求的 tag, 主要用于取消对应的请求
 						.execute(new StringCallback() {
 							@Override
@@ -397,7 +390,7 @@ public class KingTellerService extends Service {
 								Log.i(TAG, "onError: 请求失败"+e.getMessage());
 								super.onError(call, response, e);
 							}
-						});
+						});*/
             }
 
 		}
